@@ -1,0 +1,1 @@
+{"model": "DDPM", "dataset": "0.1_dim20_pair_gau", "N": 400, "seed": 120, "metrics": {"TP": 6, "FP": 26, "FN": 4, "TN": 154, "TPR": 0.6, "FDR": 0.8125, "FPR": 0.14444444444444443, "Hamming": 30}, "meta_info": {"source": "pretrained", "version": "ddpm_hessian_v1"}}

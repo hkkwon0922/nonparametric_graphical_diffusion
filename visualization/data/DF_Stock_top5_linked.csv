@@ -1,0 +1,239 @@
+Company,Stock_symbol,Sector,Sector_Broad
+3M,MMM,Industrial Conglomerates,Industrials
+A. O. Smith,AOS,Building Products,Industrials
+Abbott Laboratories,ABT,Health Care Equipment,Health Care
+AbbVie,ABBV,Biotechnology,Health Care
+Accenture,ACN,IT Consulting & Other Services,Information Technology
+Advanced Micro Devices,AMD,Semiconductors,Information Technology
+Aflac,AFL,Life & Health Insurance,Financials
+Agilent,A,Life Sciences Tools & Services,Health Care
+Airbnb,ABNB,"Hotels, Resorts & Cruise Lines",Consumer Discretionary
+Akamai,AKAM,Internet Services & Infrastructure,Information Technology
+Align Technology,ALGN,Health Care Supplies,Health Care
+Allegion,ALLE,Building Products,Industrials
+Allstate,ALL,Property & Casualty Insurance,Financials
+Amazon,AMZN,Broadline Retail,Consumer Discretionary
+American Express,AXP,Consumer Finance,Financials
+AIG.com,AIG,Multi-line Insurance,Financials
+Ameriprise Financial,AMP,Asset Management & Custody Banks,Financials
+Ametek,AME,Electrical Components & Equipment,Industrials
+Amgen,AMGN,Biotechnology,Health Care
+Amphenol,APH,Electronic Components,Information Technology
+Analog Devices,ADI,Semiconductors,Information Technology
+Apple Inc.,AAPL,"Technology Hardware, Storage & Peripherals",Information Technology
+Applied Materials,AMAT,Semiconductor Materials & Equipment,Information Technology
+Delphi Automotive,APTV,Automotive Parts & Equipment,Consumer Discretionary
+Arch Capital Group,ACGL,Property & Casualty Insurance,Financials
+Arista Networks,ANET,Communications Equipment,Information Technology
+Arthur J. Gallagher,AJG,Insurance Brokers,Financials
+Assurant,AIZ,Multi-line Insurance,Financials
+Autodesk,ADSK,Application Software,Information Technology
+ADP,ADP,Human Resource & Employment Services,Industrials
+AutoZone,AZO,Automotive Retail,Consumer Discretionary
+Bank of America,BAC,Diversified Banks,Financials
+Baxter International,BAX,Health Care Equipment,Health Care
+Becton Dickinson,BDX,Health Care Equipment,Health Care
+Berkshire Hathaway,BRK-B,Multi-Sector Holdings,Financials
+Best Buy,BBY,Computer & Electronics Retail,Consumer Discretionary
+Bio-Techne,TECH,Life Sciences Tools & Services,Health Care
+Biogen Idec,BIIB,Biotechnology,Health Care
+BlackRock,BLK,Asset Management & Custody Banks,Financials
+BNY Mellon,BK,Asset Management & Custody Banks,Financials
+Boeing,BA,Aerospace & Defense,Industrials
+Booking.com,BKNG,"Hotels, Resorts & Cruise Lines",Consumer Discretionary
+Boston Scientific,BSX,Health Care Equipment,Health Care
+Bristol Myers Squibb,BMY,Pharmaceuticals,Health Care
+Broadcom,AVGO,Semiconductors,Information Technology
+Broadridge Financial,BR,Data Processing & Outsourced Services,Industrials
+Brown & Brown,BRO,Insurance Brokers,Financials
+Builders FirstSource,BLDR,Building Products,Industrials
+C.H. Robinson,CHRW,Air Freight & Logistics,Industrials
+Cadence Design Systems,CDNS,Application Software,Information Technology
+Capital One,COF,Consumer Finance,Financials
+Cardinal Health,CAH,Health Care Distributors,Health Care
+Carnival,CCL,"Hotels, Resorts & Cruise Lines",Consumer Discretionary
+Carrier,CARR,Building Products,Industrials
+Centene,CNC,Managed Health Care,Health Care
+"Charles River Laboratories, Inc.",CRL,Life Sciences Tools & Services,Health Care
+Charles Schwab,SCHW,Investment Banking & Brokerage,Financials
+Chipotle,CMG,Restaurants,Consumer Discretionary
+Cigna,CI,Health Care Services,Health Care
+Cincinnati Financial,CINF,Property & Casualty Insurance,Financials
+Cintas,CTAS,Diversified Support Services,Industrials
+Cisco,CSCO,Communications Equipment,Information Technology
+Citigroup,C,Diversified Banks,Financials
+Citizens Bank,CFG,Regional Banks,Financials
+CME Group,CME,Financial Exchanges & Data,Financials
+Cognizant,CTSH,IT Consulting & Other Services,Information Technology
+Copart,CPRT,Diversified Support Services,Industrials
+CrowdStrike,CRWD,Systems Software,Information Technology
+Cummins,CMI,Construction Machinery & Heavy Transportation Equipment,Industrials
+CVS Health,CVS,Health Care Services,Health Care
+"D.R. Horton, Inc.",DHI,Homebuilding,Consumer Discretionary
+Danaher,DHR,Life Sciences Tools & Services,Health Care
+Darden Restaurants,DRI,Restaurants,Consumer Discretionary
+DaVita,DVA,Health Care Services,Health Care
+Deckers Brands,DECK,Footwear,Consumer Discretionary
+Delta Air Lines,DAL,Passenger Airlines,Industrials
+Dover,DOV,Industrial Machinery & Supplies & Components,Industrials
+Eaton,ETN,Electrical Components & Equipment,Industrials
+Edwards Lifesciences,EW,Health Care Equipment,Health Care
+EPAM Systems,EPAM,IT Consulting & Other Services,Information Technology
+Equifax,EFX,Research & Consulting Services,Industrials
+Expedia,EXPE,"Hotels, Resorts & Cruise Lines",Consumer Discretionary
+FactSet,FDS,Financial Exchanges & Data,Financials
+Fastenal,FAST,Trading Companies & Distributors,Industrials
+FedEx,FDX,Air Freight & Logistics,Industrials
+Fidelity National Information Services,FIS,Transaction & Payment Processing Services,Financials
+Fifth Third Bank,FITB,Regional Banks,Financials
+First Solar,FSLR,Semiconductors,Information Technology
+Fiserv,FI,Transaction & Payment Processing Services,Financials
+Ford Motor Company,F,Automobile Manufacturers,Consumer Discretionary
+Fortinet,FTNT,Systems Software,Information Technology
+Franklin Resources,BEN,Asset Management & Custody Banks,Financials
+Garmin,GRMN,Consumer Electronics,Consumer Discretionary
+Gartner,IT,IT Consulting & Other Services,Information Technology
+Generac,GNRC,Electrical Components & Equipment,Industrials
+General Dynamics,GD,Aerospace & Defense,Industrials
+General Motors,GM,Automobile Manufacturers,Consumer Discretionary
+Gilead Sciences,GILD,Biotechnology,Health Care
+Global Payments,GPN,Transaction & Payment Processing Services,Financials
+GoDaddy,GDDY,Internet Services & Infrastructure,Information Technology
+Goldman Sachs,GS,Investment Banking & Brokerage,Financials
+Hasbro,HAS,Leisure Products,Consumer Discretionary
+HCA Healthcare,HCA,Health Care Facilities,Health Care
+Henry Schein,HSIC,Health Care Distributors,Health Care
+Hewlett Packard Enterprise,HPE,"Technology Hardware, Storage & Peripherals",Information Technology
+Hilton Worldwide,HLT,"Hotels, Resorts & Cruise Lines",Consumer Discretionary
+Hologic,HOLX,Health Care Equipment,Health Care
+Honeywell,HON,Industrial Conglomerates,Industrials
+HP Inc.,HPQ,"Technology Hardware, Storage & Peripherals",Information Technology
+Humana,HUM,Managed Health Care,Health Care
+Huntington,HBAN,Regional Banks,Financials
+Huntington Ingalls Industries,HII,Aerospace & Defense,Industrials
+IBM,IBM,IT Consulting & Other Services,Information Technology
+IDEX,IEX,Industrial Machinery & Supplies & Components,Industrials
+IDEXX,IDXX,Health Care Equipment,Health Care
+Incyte,INCY,Biotechnology,Health Care
+Ingersoll-Rand,IR,Industrial Machinery & Supplies & Components,Industrials
+Intel,INTC,Semiconductors,Information Technology
+ICE,ICE,Financial Exchanges & Data,Financials
+Intuit,INTU,Application Software,Information Technology
+Intuitive Surgical,ISRG,Health Care Equipment,Health Care
+Invesco,IVZ,Asset Management & Custody Banks,Financials
+Jack Henry & Associates,JKHY,Transaction & Payment Processing Services,Financials
+Johnson & Johnson,JNJ,Pharmaceuticals,Health Care
+Johnson Controls,JCI,Building Products,Industrials
+JPMorgan Chase,JPM,Diversified Banks,Financials
+KeyCorp,KEY,Regional Banks,Financials
+Keysight Technologies,KEYS,Electronic Equipment & Instruments,Information Technology
+Labcorp,LH,Health Care Services,Health Care
+Lam Research,LRCX,Semiconductor Materials & Equipment,Information Technology
+Las Vegas Sands,LVS,Casinos & Gaming,Consumer Discretionary
+Leidos,LDOS,Diversified Support Services,Industrials
+Lennar,LEN,Homebuilding,Consumer Discretionary
+Lockheed Martin,LMT,Aerospace & Defense,Industrials
+Lowe's,LOW,Home Improvement Retail,Consumer Discretionary
+M&T Bank,MTB,Regional Banks,Financials
+Marriott International,MAR,"Hotels, Resorts & Cruise Lines",Consumer Discretionary
+Masco,MAS,Building Products,Industrials
+MasterCard,MA,Transaction & Payment Processing Services,Financials
+McDonald's,MCD,Restaurants,Consumer Discretionary
+McKesson,MCK,Health Care Distributors,Health Care
+Medtronic,MDT,Health Care Equipment,Health Care
+Merck & Co.,MRK,Pharmaceuticals,Health Care
+MetLife,MET,Life & Health Insurance,Financials
+METTLER TOLEDO,MTD,Life Sciences Tools & Services,Health Care
+MGM Resorts,MGM,Casinos & Gaming,Consumer Discretionary
+Microchip Technology,MCHP,Semiconductors,Information Technology
+Micron Technology,MU,Semiconductors,Information Technology
+Microsoft,MSFT,Systems Software,Information Technology
+Molina Healthcare,MOH,Managed Health Care,Health Care
+Moody's Corporation,MCO,Financial Exchanges & Data,Financials
+Morgan Stanley,MS,Investment Banking & Brokerage,Financials
+Motorola Solutions,MSI,Communications Equipment,Information Technology
+NetApp,NTAP,"Technology Hardware, Storage & Peripherals",Information Technology
+Nordson Corporation,NDSN,Industrial Machinery & Supplies & Components,Industrials
+Northern Trust,NTRS,Asset Management & Custody Banks,Financials
+Northrop Grumman,NOC,Aerospace & Defense,Information Technology
+Norwegian Cruise Line,NCLH,"Hotels, Resorts & Cruise Lines",Consumer Discretionary
+Nvidia,NVDA,Semiconductors,Information Technology
+NXP Semiconductors,NXPI,Semiconductors,Information Technology
+ON Semiconductor,ON,Semiconductors,Information Technology
+Oracle Corporation,ORCL,Application Software,Information Technology
+Otis Elevator,OTIS,Industrial Machinery & Supplies & Components,Industrials
+Paccar,PCAR,Construction Machinery & Heavy Transportation Equipment,Industrials
+Palantir Technologies,PLTR,Internet Services & Infrastructure,Information Technology
+Palo Alto Networks,PANW,Systems Software,Information Technology
+Parker Hannifin,PH,Industrial Machinery & Supplies & Components,Industrials
+Paychex,PAYX,Human Resource & Employment Services,Industrials
+Paycom,PAYC,Human Resource & Employment Services,Industrials
+PayPal,PYPL,Transaction & Payment Processing Services,Financials
+Pentair,PNR,Industrial Machinery & Supplies & Components,Industrials
+Pfizer,PFE,Pharmaceuticals,Health Care
+PNC Bank,PNC,Diversified Banks,Financials
+Principal Financial Group,PFG,Life & Health Insurance,Financials
+Progressive Insurance,PGR,Property & Casualty Insurance,Financials
+Prudential Financial,PRU,Life & Health Insurance,Financials
+PulteGroup,PHM,Homebuilding,Consumer Discretionary
+Qualcomm,QCOM,Semiconductors,Information Technology
+Quanta Services,PWR,Construction & Engineering,Industrials
+Quest Diagnostics,DGX,Health Care Services,Health Care
+Polo Ralph Lauren,RL,"Apparel, Accessories & Luxury Goods",Consumer Discretionary
+Raymond James Financial,RJF,Investment Banking & Brokerage,Financials
+Regeneron,REGN,Biotechnology,Health Care
+Regions Financial Corporation,RF,Regional Banks,Financials
+Republic Services,RSG,Environmental & Facilities Services,Industrials
+ResMed,RMD,Health Care Equipment,Health Care
+Rockwell Automation,ROK,Electrical Components & Equipment,Industrials
+Northrop Grumman,ROP,Electronic Equipment & Instruments,Information Technology
+Ross Stores,ROST,Apparel Retail,Consumer Discretionary
+Royal Caribbean International,RCL,"Hotels, Resorts & Cruise Lines",Consumer Discretionary
+McGraw-Hill,SPGI,Financial Exchanges & Data,Financials
+Salesforce,CRM,Application Software,Information Technology
+Seagate,STX,"Technology Hardware, Storage & Peripherals",Information Technology
+ServiceNow,NOW,Systems Software,Information Technology
+Skyworks Solutions,SWKS,Semiconductors,Information Technology
+Snap-on,SNA,Industrial Machinery & Supplies & Components,Industrials
+Southwest Airlines,LUV,Passenger Airlines,Industrials
+Stanley Black & Decker,SWK,Industrial Machinery & Supplies & Components,Industrials
+Starbucks,SBUX,Restaurants,Consumer Discretionary
+State Street Corporation,STT,Asset Management & Custody Banks,Financials
+Steris,STE,Health Care Equipment,Health Care
+Stryker Corporation,SYK,Health Care Equipment,Health Care
+Supermicro,SMCI,"Technology Hardware, Storage & Peripherals",Information Technology
+Synopsys,SNPS,Application Software,Information Technology
+T. Rowe Price,TROW,Asset Management & Custody Banks,Financials
+TE Connectivity,TEL,Electronic Manufacturing Services,Information Technology
+Teledyne Technologies,TDY,Electronic Equipment & Instruments,Information Technology
+Teradyne,TER,Semiconductor Materials & Equipment,Information Technology
+Texas Instruments,TXN,Semiconductors,Information Technology
+Textron,TXT,Aerospace & Defense,Industrials
+Thermo Fisher Scientific,TMO,Life Sciences Tools & Services,Health Care
+TJX,TJX,Apparel Retail,Consumer Discretionary
+Tractor Supply,TSCO,Other Specialty Retail,Consumer Discretionary
+TransDigm Group,TDG,Aerospace & Defense,Industrials
+Truist,TFC,Diversified Banks,Financials
+Tyler Technologies,TYL,Application Software,Information Technology
+U.S. Bank,USB,Diversified Banks,Financials
+Uber,UBER,Passenger Ground Transportation,Industrials
+Ulta Salon Cosmetics & Fragrance,ULTA,Other Specialty Retail,Consumer Discretionary
+UPS,UPS,Air Freight & Logistics,Industrials
+United Rentals,URI,Trading Companies & Distributors,Industrials
+UnitedHealth Group,UNH,Managed Health Care,Health Care
+Universal Hospital Services,UHS,Health Care Facilities,Health Care
+Verisign,VRSN,Internet Services & Infrastructure,Information Technology
+Verisk Analytics,VRSK,Research & Consulting Services,Industrials
+Vertex Pharmaceuticals,VRTX,Biotechnology,Health Care
+w.r. berkely corporation,WRB,Property & Casualty Insurance,Financials
+Wabtec,WAB,Construction Machinery & Heavy Transportation Equipment,Industrials
+Waste Management,WM,Environmental & Facilities Services,Industrials
+Waters Corporation,WAT,Life Sciences Tools & Services,Health Care
+Wells Fargo,WFC,Diversified Banks,Financials
+West Pharmaceutical,WST,Health Care Supplies,Health Care
+Western Digital,WDC,"Technology Hardware, Storage & Peripherals",Information Technology
+Wynn Resorts,WYNN,Casinos & Gaming,Consumer Discretionary
+Yum! Brands,YUM,Restaurants,Consumer Discretionary
+Zebra Technologies,ZBRA,Electronic Equipment & Instruments,Information Technology
+Zimmer Holdings,ZBH,Health Care Equipment,Health Care
+Zoetis,ZTS,Pharmaceuticals,Health Care

@@ -1,0 +1,1 @@
+{"model": "DDPM", "dataset": "dim20_butterfly", "N": 200, "seed": 1234560, "metrics": {"TP": 5, "FP": 17, "FN": 5, "TN": 163, "TPR": 0.5, "FDR": 0.7727272727272727, "FPR": 0.09444444444444444, "Hamming": 22}, "meta_info": {"source": "pretrained", "version": "ddpm_hessian_v1"}}

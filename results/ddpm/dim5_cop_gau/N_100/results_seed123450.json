@@ -1,0 +1,1 @@
+{"model": "DDPM", "dataset": "dim5_cop_gau", "N": 100, "seed": 123450, "metrics": {"TP": 3, "FP": 0, "FN": 1, "TN": 6, "TPR": 0.75, "FDR": 0.0, "FPR": 0.0, "Hamming": 1}, "meta_info": {"source": "pretrained", "version": "ddpm_hessian_v1"}}

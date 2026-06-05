@@ -1,0 +1,29 @@
+name: env_cpu
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - numpy>=1.26.0
+  - scipy>=1.13.1
+  - scikit-learn>=1.5.0
+  - pandas
+  - networkx>=3.2.1
+  - matplotlib>=3.9.0
+  - r-base>=4.3.1
+  - r-glasso
+  - r-huge
+  - r-igraph
+  - r-matrix
+  - r-mass
+  - rpy2>=3.5.11
+  - tqdm
+  - jupyterlab
+  - suitesparse
+  - scikit-sparse
+  - pip
+  - pip:
+    - TransportMaps==2.0b3
+    - mpmath
+    - sympy
+    - pycop
