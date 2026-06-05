@@ -1,82 +1,43 @@
 
-# Benchmark for Graph Structure Learning in Non-Gaussian Distributions
+# Nonparametric undirected graphical model selection using diffusion models
 
-This repository provides a unified benchmarking framework to evaluate the scalability and accuracy of various Graph Structure Learning (Markov Network Estimation) algorithms, particularly in continuous, non-Gaussian, and non-parametric data environments. It also includes a **DDPM-Hessian** approach that recovers conditional-independence structure from the Hessian of a trained diffusion model's score function.
+## Abstract
 
-## 1. Project Overview
+Undirected graphical models provide a fundamental framework for representing conditional independence structures among high-dimensional random variables. While undirected graphical model selection has become a central problem in high-dimensional statistics, most existing methods are restricted to parametric settings. In this paper, we develop a nonparametric approach to undirected graphical model selection based on diffusion models. Recent work has shown that diffusion models can adapt to the unknown graph structure of the underlying distribution, yet utilizing these models for explicit graph estimation remains unexplored. To bridge this gap, we introduce a novel diffusion-based method for nonparametric undirected graphical model selection. We establish the model selection consistency of the proposed method and demonstrate its empirical performance through extensive simulations and two real data analyses.
 
-Estimating the conditional independence structure of high-dimensional data is a fundamental task in probabilistic graphical models (PGMs). While many traditional methods rely heavily on the assumption of Gaussianity, recent advancements focus on non-Gaussian and non-parametric settings.
+## Overview
 
-This project provides a standardized pipeline to:
-
-- generate complex synthetic datasets (Copula Gaussian, Butterfly, Pairwise Gaussian);
-- run both statistical and deep-learning-based structure-learning algorithms (GLASSO, NPN, SING, L-SING, and a DDPM-Hessian estimator);
-- evaluate performance via network-recovery metrics (Hamming Distance, TPR, FDR) and time complexity;
-- apply the DDPM-Hessian estimator to two real domains — a **financial sector network** and the **MNIST pixel grid** — with self-contained visualization notebooks.
-
-## 2. Repository Structure
+To reproduce the numerical experiments in the main paper, readers can run the following notebooks:
 
 ```text
-├── data/
-│   ├── generate_data.py            # Master orchestrator for synthetic dataset generation
-│   ├── butterfly.py                # Continuous non-Gaussian structure generator
-│   ├── cop_gau.py                  # Copula Gaussian generator (requires pycop)
-│   ├── pair_gau.py                 # Pairwise Gaussian with adjustable correlation (rho)
-│   ├── raw/                        # Generated synthetic datasets (.npy)
-│   └── network/                    # Financial-network data
-│       ├── build_sector_rt_csv.ipynb       # Build per-sector daily-return CSVs
-│       ├── inputs/                          # Frozen close prices + company metadata
-│       ├── sector_relationship_adjacency/   # Per-sector relationship adjacency (pickle)
-│       └── sector_rt_csv_2019_connected/    # Output: per-sector return matrices (CSV)
-├── models/
-│   ├── glasso/                     # Graphical Lasso (baseline)
-│   ├── npn/                        # Nonparanormal / Copula Graphical Models
-│   ├── sing/                       # SING (Sparsity Identification for Non-Gaussian)
-│   ├── lsing/                      # L-SING (Localized SING)
-│   └── ddpm/                       # DDPM-based graph structure learning
-│       └── core/ddpm_torch/        # In-repo DDPM modules (UNet, toy Decoder, diffusion)
-├── experiments/
-│   ├── run_benchmark.py            # Unified benchmark execution script
-│   ├── utils.py                    # Evaluation metrics and I/O utilities
-│   ├── train_ddpm_network.py       # Train per-sector DDPMs on financial return data
-│   ├── compute_hessian_network.py  # Compute the per-timestep Hessian of a network DDPM
-│   ├── train_ddpm_mnist.py         # Train a DDPM (UNet) on MNIST
-│   └── compute_hessian_mnist.py    # Compute the per-timestep Hessian of an MNIST DDPM
 ├── visualization/
-│   ├── plot_results.ipynb          # Benchmark metric plots (HD / TPR / FDR vs sample size)
-│   ├── network_results.ipynb       # Financial-network estimated graph
-│   ├── image_results.ipynb         # MNIST pixel-graph selection
-│   ├── toy_example.ipynb           # D=3 Gaussian-chain sanity check
-│   ├── mnist_graph.py              # Pipeline helpers for the MNIST visualization
-│   └── data/                       # Self-contained inputs for the notebooks
-├── results/                        # Benchmark metric outputs (JSON, per model/dataset/N/seed)
-├── figures/                        # Saved figures from the notebooks
-├── env_cpu.yml                     # Conda environment for CPU-based statistical models
-└── env_gpu.yml                     # Conda environment for GPU-based deep learning models
+│   ├── plot_results.ipynb          # Simulation results
+│   ├── network_results.ipynb       # Network analysis
+│   ├── image_results.ipynb         # Image analysis
+│   ├── toy_example.ipynb           # Illustrative examples
 ```
 
-> Training/run artifacts (`checkpoints/`, `samples/`, downloaded MNIST data) are
-> re-generated by the scripts and are excluded from version control.
+## Reproducing the experiments
 
-## 3. Environment Setup
+## 1. Environment setup
 
-To prevent dependency conflicts between R-based statistical packages and PyTorch-based deep learning models, the environment is split into CPU and GPU configurations.
+To avoid dependency conflicts between R-based statistical packages and PyTorch-based deep learning models, we use separate CPU and GPU environments.
 
 ```bash
-# [1] CPU environment (GLASSO, NPN, SING / includes R, TransportMaps, PyCop)
+# [1] CPU environment: GLASSO, NPN, and SING
+# Includes R, TransportMaps, and PyCop
 conda env create -f env_cpu.yml
 conda activate env_cpu
 
-# [2] GPU environment (L-SING, DDPM / includes PyTorch and CUDA)
+# [2] GPU environment: L-SING and DDPM
+# Includes PyTorch and CUDA
 conda env create -f env_gpu.yml
 conda activate env_gpu
 ```
 
-## 4. Benchmark Pipeline
+## 2. Simulation pipeline
 
-### Step 1 — Data Generation
-
-Generate synthetic datasets (Butterfly, Copula Gaussian, Pairwise Gaussian) across varying dimensions (D) and sample sizes (N).
+### Step 1 — Data generation
 
 ```bash
 cd data
@@ -84,11 +45,7 @@ conda activate env_cpu
 python generate_data.py
 ```
 
-*(Generated data is stored as `.npy` files under `data/raw/`.)*
-
-### Step 2 — Running the Benchmark
-
-Run the evaluation orchestrator. It handles data loading, model inference, and metric calculation, writing one JSON per (model, dataset, N, seed) under `results/`.
+### Step 2 — Running the benchmark
 
 ```bash
 cd experiments
@@ -105,60 +62,27 @@ python run_benchmark.py --model lsing
 python run_benchmark.py --model ddpm
 ```
 
-### Step 3 — Visualization & Analysis
+## 3. Real data analysis
 
-Run `visualization/plot_results.ipynb` to parse all JSON results and produce the
-metric plots (Hamming, TPR, FDR vs. sample size) and the combined multi-dataset figure.
-
-```bash
-cd visualization
-jupyter notebook plot_results.ipynb
-```
-
-## 5. DDPM-Hessian on Real Data
-
-The DDPM-Hessian estimator is also applied to two real domains. Each visualization
-notebook is **self-contained**: it reads pre-computed inputs from `visualization/data/`
-and only plots, so it runs without a GPU or the training checkpoints.
-
-### Financial sector network
-
-```bash
-# (a) Build the per-sector daily-return CSVs from close prices + relationships
-#     -> data/network/build_sector_rt_csv.ipynb
-
-# (b) Train a per-sector DDPM, then compute its Hessian
-cd experiments
-python train_ddpm_network.py        # reads data/network/sector_rt_csv_2019_connected/
-python compute_hessian_network.py   # writes the Hessian pickle to visualization/data/
-
-# (c) Visualize the estimated graph
-#     -> visualization/network_results.ipynb
-```
-
-### MNIST pixel grid
+### Network analysis
 
 ```bash
 cd experiments
-python train_ddpm_mnist.py          # trains a UNet DDPM on MNIST
-python compute_hessian_mnist.py     # computes the per-timestep pixel Hessian
 
-# -> visualization/image_results.ipynb   (pixel-graph selection)
-# -> visualization/toy_example.ipynb     (D=3 Gaussian-chain sanity check)
-```
+# Train DDPM, then compute its Hessian
+python train_ddpm_network.py # Reads data/network/sector_rt_csv_2019_connected/
+python compute_hessian_network.py # Writes the Hessian pickle file
 
-The estimation pipeline: for each diffusion timestep `t`, estimate the Hessian of
-`log p_t(x)` via the posterior covariance of `x_0 | x_t`; standardize the per-pair
-Hessian trajectories; cluster them with KMeans to recover the edge set.
+### Image analysis
 
-## 6. References & Acknowledgements
+```bash
+cd experiments
 
-This benchmark is built upon the following core methodologies and open-source packages:
+# Train a UNet DDPM on MNIST and compute the pixel-wise Hessian
+python train_ddpm_mnist.py # Trains a UNet DDPM on MNIST
+python compute_hessian_mnist.py # Computes the per-timestep pixel Hessian
 
-### Core Methodologies & Baselines
 
-* **GPM (baseline motivation):** Zheng, Y., Ng, I., Fan, Y., & Zhang, K. (2023). Generalized Precision Matrix for Scalable Estimation of Nonparametric Markov Networks. *ICLR*. [[GitHub]](https://github.com/YujiaZheng/generalized-precision-matrix)
-* **SING:** Baptista, R., Marzouk, Y., Morrison, R. E., & Zahm, O. (2023). Learning non-Gaussian graphical models via Hessian scores and triangular transport. *JMLR*. [[GitHub]](https://github.com/baptistar/SING)
-* **L-SING:** Liaw, S., Morrison, R., Marzouk, Y., & Baptista, R. (2025). Learning Local Neighborhoods of Non-Gaussian Graphical Models. *AAAI*. [[GitHub]](https://github.com/SarahLiaw/L-SING)
-* **GLASSO implementation:** Adapted from the wrapper provided in [[GitHub]](https://github.com/zhao-lyu/GGM).
-* **NPN (Nonparanormal):** Liu, H., Lafferty, J., & Wasserman, L. (2009). The Nonparanormal: Semiparametric Estimation of High Dimensional Undirected Graphs. *JMLR*. Uses the [huge](https://cran.r-project.org/web/packages/huge/index.html) R package.
+
+
+
