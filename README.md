@@ -66,15 +66,6 @@ python run_benchmark.py --model ddpm
 
 ## 3. Real data analysis
 
-### Network analysis
-
-```bash
-cd experiments
-
-# Train DDPM, then compute its Hessian
-python train_ddpm_network.py # Reads data/network/sector_rt_csv_2019_connected/
-python compute_hessian_network.py # Writes the Hessian pickle file
-
 ### Image analysis
 
 ```bash
@@ -83,7 +74,17 @@ cd experiments
 # Train a UNet DDPM on MNIST and compute the pixel-wise Hessian
 python train_ddpm_mnist.py # Trains a UNet DDPM on MNIST
 python compute_hessian_mnist.py # Computes the per-timestep pixel Hessian
+```
 
+### Network analysis
+
+```bash
+cd experiments
+
+# Train DDPM, then compute its Hessian
+python train_ddpm_network.py # Reads data/network/sector_rt_csv_2019_connected/
+python compute_hessian_network.py # Writes the Hessian pickle file
+```
 
 
 
