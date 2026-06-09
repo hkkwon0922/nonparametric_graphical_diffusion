@@ -1,6 +1,7 @@
 
 # Nonparametric undirected graphical model selection using diffusion models
-Hyeok Kyu Kwon, Myeonggu Kang, Minwoo Chae and Wanjie Wang
+Hyeok Kyu Kwon, Myeonggu Kang, Minwoo Chae and Wanjie Wang [arXiv](https://arxiv.org/abs/2606.08468)
+
 
 
 ## Abstract
