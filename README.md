@@ -454,10 +454,19 @@ and seeds). Ranks are invariant to any monotone per-timestep rescaling.
 Following the paper's Appendix D, with reversed edges counted as false
 negatives:
 
-- **FNR-pi** — false negative rate of the fully connected DAG encoding the
-  estimated order. Scores the **ordering stage alone**; zero iff the order is
-  consistent with every true edge.
-- **F1 / FNR / FPR** — of the final edge set.
+**Ordering stage** (`ordering_metrics`) — a DAG usually admits many valid
+topological orders, so these score only the pairs the graph actually
+constrains; *any* valid order attains a perfect value:
+
+| Metric | Meaning | Perfect | Chance |
+|---|---|---|---|
+| `fnr_pi` | fraction of true edges the order reverses (the paper's FNR-pi) | 0 | ~0.5 |
+| `edge_accuracy` | `1 - fnr_pi` | 1 | ~0.5 |
+| `ancestor_accuracy` | fraction of **transitive-closure** ancestor pairs ordered correctly — also scores indirect constraints | 1 | ~0.5 |
+| `kendall_tau` | `ancestor_accuracy` rescaled to `[-1, 1]` | 1 | ~0 |
+
+**Edge stage** — `f1` / `fnr` / `fpr` of the final edge set, with reversed
+edges counted as false negatives.
 
 Every run additionally reports `das_oracle_order` and `cluster_oracle_order`,
 which repeat parent selection on the **true** order. The gap between these and
@@ -478,6 +487,28 @@ python experiments/run_benchmark_sweep.py \
 Aggregates as median / quartiles across seeds (the paper uses 20 seeds and
 violin plots) and includes their random baseline (Appendix C.10: random order,
 each admitted edge kept with probability 0.5).
+
+**Measured ordering performance** (ER-20 dense, 3 seeds, 512 anchors), against
+a Monte-Carlo reference of 2000 random permutations on the same graphs:
+
+| Metric | Estimated (median) | Random permutation | z |
+|---|---|---|---|
+| FNR-pi | 0.151 | 0.501 ± 0.096 | −3.6 |
+| edge accuracy | 0.849 | 0.499 ± 0.096 | +3.6 |
+| ancestor accuracy | 0.847 | 0.500 ± 0.097 | +3.8 |
+| Kendall tau | 0.693 | −0.001 ± 0.194 | +3.8 |
+
+Roughly 85% of true edges and of transitive-closure ancestor pairs get the
+right direction, consistently across seeds (edge accuracy 0.797–0.875). None of
+the 2000 random permutations was a valid order. No run produced a *perfect*
+order, though — 10–15 edges stay reversed per seed, which is what the
+`cluster` 0.644 vs `cluster_oracle_order` 0.706 gap measures.
+
+Regenerate with:
+
+```bash
+python scripts/collect_ordering_performance.py
+```
 
 **Budget matters.** On ER-10 dense, raising anchors from 128 to 512 moved
 ordering FNR-pi from 0.29 to 0.12 and DAS F1 from 0.30 to 0.55. The DAS test is

@@ -1,0 +1,92 @@
+{
+ "per_run": [
+  {
+   "fnr_pi": 0.1506849315068493,
+   "edge_accuracy": 0.8493150684931507,
+   "ancestor_accuracy": 0.8467153284671532,
+   "kendall_tau": 0.6934306569343065,
+   "num_violated_edges": 11,
+   "num_true_edges": 73,
+   "num_ancestor_pairs": 137,
+   "is_valid_order": false,
+   "label": "seed0",
+   "num_nodes": 20
+  },
+  {
+   "fnr_pi": 0.125,
+   "edge_accuracy": 0.875,
+   "ancestor_accuracy": 0.9241379310344827,
+   "kendall_tau": 0.8482758620689654,
+   "num_violated_edges": 10,
+   "num_true_edges": 80,
+   "num_ancestor_pairs": 145,
+   "is_valid_order": false,
+   "label": "seed1",
+   "num_nodes": 20
+  },
+  {
+   "fnr_pi": 0.20270270270270271,
+   "edge_accuracy": 0.7972972972972973,
+   "ancestor_accuracy": 0.8263888888888888,
+   "kendall_tau": 0.6527777777777777,
+   "num_violated_edges": 15,
+   "num_true_edges": 74,
+   "num_ancestor_pairs": 144,
+   "is_valid_order": false,
+   "label": "seed2",
+   "num_nodes": 20
+  }
+ ],
+ "aggregate": {
+  "fnr_pi": {
+   "median": 0.1506849315068493,
+   "q25": 0.13784246575342465,
+   "q75": 0.176693817104776,
+   "mean": 0.15946254473651733
+  },
+  "edge_accuracy": {
+   "median": 0.8493150684931507,
+   "q25": 0.823306182895224,
+   "q75": 0.8621575342465754,
+   "mean": 0.8405374552634827
+  },
+  "ancestor_accuracy": {
+   "median": 0.8467153284671532,
+   "q25": 0.836552108678021,
+   "q75": 0.885426629750818,
+   "mean": 0.8657473827968416
+  },
+  "kendall_tau": {
+   "median": 0.6934306569343065,
+   "q25": 0.6731042173560421,
+   "q75": 0.770853259501636,
+   "mean": 0.7314947655936832
+  }
+ },
+ "random_order_reference": {
+  "fnr_pi": {
+   "mean": 0.5011732082253486,
+   "std": 0.0959187132958697
+  },
+  "edge_accuracy": {
+   "mean": 0.4988267917746514,
+   "std": 0.0959187132958697
+  },
+  "ancestor_accuracy": {
+   "mean": 0.4997048982833198,
+   "std": 0.09723840896462767
+  },
+  "kendall_tau": {
+   "mean": -0.0005902034333603633,
+   "std": 0.1944768179292553
+  },
+  "prob_valid_order": 0.0
+ },
+ "zscore_vs_random": {
+  "fnr_pi": -3.5625025789784597,
+  "edge_accuracy": 3.5625025789784597,
+  "ancestor_accuracy": 3.7643816719242778,
+  "kendall_tau": 3.764381671924278
+ },
+ "note": "ancestor_accuracy scores the transitive closure, so indirect constraints count too; kendall_tau is that value rescaled to [-1, 1]. Any valid topological order attains 1.0."
+}

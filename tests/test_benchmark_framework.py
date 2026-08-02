@@ -10,7 +10,12 @@ from data.benchmark_scm import (
     simulate_anm_gp,
     topological_order_of,
 )
-from models.dag_diffusion.benchmark_metrics import edge_metrics, fnr_pi
+from models.dag_diffusion.benchmark_metrics import (
+    edge_metrics,
+    fnr_pi,
+    kendall_tau_vs_valid_orders,
+    ordering_metrics,
+)
 from models.dag_diffusion.diagnostics import is_acyclic
 from models.dag_diffusion.parent_selection import (
     benjamini_hochberg,
@@ -248,3 +253,51 @@ def test_random_baseline_is_not_secretly_an_oracle():
     assert (fnrs > 0.0).all(), f"baseline achieved a perfect order: {fnrs}"
     # a random order violates roughly half the edges
     assert 0.2 < fnrs.mean() < 0.8, f"baseline FNR-pi implausible: {fnrs.mean()}"
+
+
+# ------------------------------------------------------- ordering metrics
+def test_ordering_metrics_perfect_for_true_order():
+    A = sample_er_dag(10, "dense", seed=6)
+    m = ordering_metrics(topological_order_of(A), A)
+    assert m["fnr_pi"] == 0.0
+    assert m["edge_accuracy"] == pytest.approx(1.0)
+    assert m["ancestor_accuracy"] == pytest.approx(1.0)
+    assert m["kendall_tau"] == pytest.approx(1.0)
+    assert m["is_valid_order"] is True
+
+
+def test_ordering_metrics_worst_for_reversed_order():
+    A = sample_er_dag(10, "dense", seed=6)
+    m = ordering_metrics(list(reversed(topological_order_of(A))), A)
+    assert m["fnr_pi"] == pytest.approx(1.0)
+    assert m["kendall_tau"] == pytest.approx(-1.0)
+    assert m["is_valid_order"] is False
+
+
+def test_any_valid_order_scores_perfectly():
+    """A DAG admits many valid orders; all must score 1.0, not just one."""
+    # v-structure 0 -> 2 <- 1: both [0,1,2] and [1,0,2] are valid
+    A = np.zeros((3, 3), dtype=int)
+    A[0, 2] = 1
+    A[1, 2] = 1
+    for order in ([0, 1, 2], [1, 0, 2]):
+        m = ordering_metrics(order, A)
+        assert m["is_valid_order"] is True
+        assert m["kendall_tau"] == pytest.approx(1.0)
+
+
+def test_ancestor_accuracy_scores_indirect_constraints():
+    """The chain 0->1->2 constrains (0,2) even though it is not an edge."""
+    A = np.zeros((3, 3), dtype=int)
+    A[0, 1] = 1
+    A[1, 2] = 1
+    m = ordering_metrics([0, 1, 2], A)
+    assert m["num_true_edges"] == 2
+    assert m["num_ancestor_pairs"] == 3  # (0,1), (1,2) and the induced (0,2)
+
+
+def test_kendall_tau_helper_matches_ordering_metrics():
+    A = sample_er_dag(10, "dense", seed=8)
+    order = list(np.random.default_rng(0).permutation(10))
+    assert kendall_tau_vs_valid_orders(order, A) == pytest.approx(
+        ordering_metrics(order, A)["kendall_tau"])

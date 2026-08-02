@@ -23,7 +23,8 @@ from typing import Dict, Sequence
 
 import numpy as np
 
-__all__ = ["fnr_pi", "edge_metrics", "summarize_run"]
+__all__ = ["fnr_pi", "edge_metrics", "summarize_run", "ordering_metrics",
+           "kendall_tau_vs_valid_orders"]
 
 
 def _skeleton(adj: np.ndarray) -> np.ndarray:
@@ -98,3 +99,88 @@ def summarize_run(topological_order: Sequence[int],
     out = {"fnr_pi": fnr_pi(topological_order, true_adjacency)}
     out.update(edge_metrics(pred_adjacency, true_adjacency))
     return out
+
+
+# ---------------------------------------------------------------------------
+# ordering-stage metrics
+# ---------------------------------------------------------------------------
+def _ancestor_matrix(adj: np.ndarray) -> np.ndarray:
+    """Transitive closure: ``R[i, j] = 1`` iff ``i`` is an ancestor of ``j``."""
+    R = (np.asarray(adj) != 0).astype(bool).copy()
+    d = R.shape[0]
+    for k in range(d):  # Floyd-Warshall style closure, O(d^3)
+        R |= np.outer(R[:, k], R[k, :])
+    return R.astype(int)
+
+
+def kendall_tau_vs_valid_orders(topological_order: Sequence[int],
+                                true_adjacency: np.ndarray) -> float:
+    """Kendall tau-like agreement restricted to pairs the DAG actually constrains.
+
+    A DAG generally admits many valid topological orders, so comparing against
+    one arbitrary reference permutation is misleading. Only **ancestor pairs**
+    are constrained: if ``i`` is an ancestor of ``j`` then every valid order puts
+    ``i`` first. This returns the fraction of such pairs the estimate gets right,
+    rescaled to ``[-1, 1]`` (``1`` = all constrained pairs correct, ``0`` =
+    coin-flip, ``-1`` = all reversed). Unconstrained pairs are ignored, so a
+    perfect score is attainable by *any* valid order.
+    """
+    order = [int(i) for i in topological_order]
+    R = _ancestor_matrix(true_adjacency)
+    pos = {node: k for k, node in enumerate(order)}
+    pairs = np.argwhere(R == 1)
+    if pairs.shape[0] == 0:
+        return float("nan")
+    correct = sum(1 for i, j in pairs if pos[int(i)] < pos[int(j)])
+    return float(2.0 * correct / pairs.shape[0] - 1.0)
+
+
+def ordering_metrics(topological_order: Sequence[int],
+                     true_adjacency: np.ndarray) -> Dict[str, float]:
+    """Performance of the **ordering stage alone**, independent of edge selection.
+
+    Returns
+    -------
+    ``fnr_pi``
+        Fraction of true edges the order reverses (the paper's FNR-pi). 0 is
+        perfect; a random order gives ~0.5.
+    ``edge_accuracy``
+        ``1 - fnr_pi``, i.e. the fraction of true edges the order is consistent
+        with. Reported because "higher is better" is easier to read alongside F1.
+    ``ancestor_accuracy``
+        Same idea over the transitive closure: fraction of *ancestor* pairs
+        ordered correctly. Stricter than ``edge_accuracy`` on deep graphs, since
+        it also scores indirect constraints.
+    ``kendall_tau``
+        ``ancestor_accuracy`` rescaled to ``[-1, 1]`` (see
+        :func:`kendall_tau_vs_valid_orders`).
+    ``num_violated_edges`` / ``num_true_edges``
+        Raw counts behind ``fnr_pi``.
+    ``is_valid_order``
+        ``True`` iff the order is consistent with **every** true edge, i.e. it is
+        one of the DAG's valid topological orders.
+    """
+    order = [int(i) for i in topological_order]
+    A = (np.asarray(true_adjacency) != 0).astype(int)
+    pos = {node: k for k, node in enumerate(order)}
+
+    edges = np.argwhere(A == 1)
+    n_edges = int(edges.shape[0])
+    violated = sum(1 for i, j in edges if pos[int(i)] > pos[int(j)])
+    fnr = float(violated) / n_edges if n_edges > 0 else float("nan")
+
+    R = _ancestor_matrix(A)
+    anc = np.argwhere(R == 1)
+    anc_correct = sum(1 for i, j in anc if pos[int(i)] < pos[int(j)])
+    anc_acc = float(anc_correct) / anc.shape[0] if anc.shape[0] > 0 else float("nan")
+
+    return {
+        "fnr_pi": fnr,
+        "edge_accuracy": (1.0 - fnr) if n_edges > 0 else float("nan"),
+        "ancestor_accuracy": anc_acc,
+        "kendall_tau": (2.0 * anc_acc - 1.0) if anc.shape[0] > 0 else float("nan"),
+        "num_violated_edges": int(violated),
+        "num_true_edges": n_edges,
+        "num_ancestor_pairs": int(anc.shape[0]),
+        "is_valid_order": bool(violated == 0),
+    }
