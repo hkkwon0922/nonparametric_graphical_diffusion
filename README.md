@@ -90,3 +90,191 @@ python compute_hessian_network.py # Writes the Hessian pickle file
 
 
 
+
+---
+
+## 4. Diffusion-based DAG ordering by conditional Tweedie Hessians
+
+An **experimental** extension that recovers a *topological ordering* of a DAG
+from a single trained full-dimensional DDPM. It reuses the same
+`Decoder5D_0204` network, `GaussianDiffusion` schedule and reverse-sampling
+code as the undirected-graph pipeline above; nothing in that pipeline changes.
+
+### What it does and does not produce
+
+- It estimates a **topological order**, i.e. a permutation of `0..D-1`.
+- It does **not** infer a sparse DAG skeleton. The
+  `fully_connected_order_dag` field in the output is the *complete* DAG
+  consistent with the estimated order — an order encoding, nothing more.
+  Accordingly, only order-level metrics (order FNR, stagewise leaf validity)
+  are reported; SHD and edge-F1 are deliberately omitted.
+- The DDPM is trained **once**, on all `D` dimensions. No per-subset model is
+  ever retrained.
+
+### Method
+
+With `X_t = sqrt(alpha_bar_t) X_0 + sqrt(1 - alpha_bar_t) eps`, write
+`sigma2_t = 1 - alpha_bar_t`. For a remaining set `S`, the second-order Tweedie
+identity gives the Hessian of the noised marginal log-density
+
+```
+H_S(x_S, t) = grad^2 log p_{t,S}(x_S)
+            = alpha_bar_t / sigma2_t^2 * Cov(X_{0,S} | X_{t,S} = x_S)
+              - I / sigma2_t
+```
+
+(the `sigma_t^4` of the write-up is `sigma2_t ** 2` in code, since
+`sigma2_t = 1 - alpha_bar_t`).
+
+At each stage, with `S` the set of remaining variables:
+
+1. **Anchors.** Draw `B` conditioning anchors by forward-diffusing `B` rows of
+   the data to `t_order` with `q_sample`, keeping only the `S` coordinates. The
+   *same* full-dimensional anchor set is reused at every stage and merely
+   restricted to the current `S`, so candidate nodes are never compared across
+   different noise realisations.
+2. **Conditional Langevin (Stage A).** Sample the free block
+   `X_{t,R} | X_{t,S} = x_{t,S}`, `R = {0..D-1} \ S`, with fixed-time
+   unadjusted Langevin dynamics. This is possible without retraining because
+   `grad_{x_R} log p_t(x_R | x_S) = grad_{x_R} log p_t(x_R, x_S)`, i.e. the `R`
+   rows of the learned *full* score with `x_S` pinned.
+3. **Reverse diffusion (Stage B).** Merge `x_{t,S}` with the sampled `x_{t,R}`
+   into a full `D`-dimensional `x_t`, reverse-diffuse `t -> 0` with
+   `p_sample_step`, and retain only the `S` coordinates of the resulting `x_0`.
+4. **Covariance and Hessian.** Estimate `Cov(X_{0,S} | X_{t,S})` from those
+   samples (unbiased, `M-1` denominator, float64, Welford-style streaming) and
+   apply the Tweedie formula.
+5. **Leaf removal.** Score each `i in S` by the variance of its **signed**
+   diagonal Hessian across the `B` anchors, `V_i = Var_b(H_ii)`, and remove
+   `argmin_i V_i`. Ties break toward the smallest original index.
+
+Repeat until one node remains. `leaf_order` records removals (sinks first) and
+`topological_order = reverse(leaf_order)` runs source to sink.
+
+At the first stage `S` is all of `{0..D-1}`, so `R` is empty and no Langevin
+simulation is performed; the posterior-sample budget is supplied entirely by
+independent reverse trajectories instead.
+
+### Scientific caveat
+
+The SCORE theorem — a leaf of a nonlinear additive-noise SCM has constant
+diagonal score Hessian — is stated at `t = 0`, on the **clean** density. This
+implementation evaluates the criterion at a strictly positive diffusion time
+`t_order > 0`, where the Gaussian smoothing of `p_t` mixes contributions across
+variables. **The positive-time criterion is experimental and is not
+automatically implied by the `t = 0` guarantee.** Smaller `t_order` sits closer
+to the regime where the theory applies, but pays for it with a larger
+reverse-diffusion variance and a `1 / sigma2_t^2` amplification of covariance
+error. `t_order` must be given explicitly; no averaging across timesteps is
+performed, because no aggregation rule is defined for it.
+
+### Observed behaviour on the D=3 chain
+
+On the bundled `0 -> 1 -> 2` nonlinear ANM (2000 samples, a DDPM trained for
+1500 epochs), the stage-0 criterion behaves as follows — `argmin` is the
+selected leaf, and node 2 is the true sink:
+
+| `t_order` | criterion `[x0, x1, x2]` | selected leaf | recovered order |
+|---|---|---|---|
+| 1 | `[231.3, 206.2, 240.5]` | 1 | `[0, 2, 1]` |
+| 2 | `[120.3, 126.3, 126.9]` | 0 | `[1, 2, 0]` |
+| 3 | `[93.7, 77.2, 66.7]` | 2 | `[0, 1, 2]` |
+| 8 | `[24.2, 7.2, 6.6]` | 2 | `[0, 1, 2]` |
+| 20 | `[8.3, 0.9, 0.5]` | 2 | `[0, 1, 2]` |
+
+(128 anchors, 32 chains, 16 retained states.) At `t_order >= 3` the true order
+is recovered with order FNR `0.0` and stagewise leaf validity `3/3`. At `t = 1`
+and `t = 2` the criterion is flat and the selection is essentially noise: the
+`1 / sigma2_t^2` factor amplifies covariance error badly when `sigma2_t` is
+small, which is exactly the tension noted in the caveat above. The separation
+between the sink and the rest is also much weaker at 64 anchors than at 128, so
+`--num-anchors` matters as much as `t_order`.
+
+This is a single tiny example and should not be read as a general validation of
+the method.
+
+### Debug run (CPU, a few minutes)
+
+Settings below exist **only to validate that the code path works**. They are
+not scientifically adequate — far too few anchors, posterior samples and
+Langevin steps for a trustworthy covariance.
+
+```bash
+conda activate env_gpu
+
+# generate the tiny D=3 nonlinear ANM chain 0 -> 1 -> 2
+python data/make_dag_ordering_debug_data.py --output-dir data/dag_ordering_debug
+
+python experiments/run_dag_ordering.py --config configs/dag_ordering_debug.json
+```
+
+### Checkpoint-based run
+
+```bash
+python experiments/run_dag_ordering.py \
+    --data-path data/example.npy \
+    --checkpoint-path checkpoints/example/ddpm.pt \
+    --output-dir results/dag_ordering/example \
+    --t-order 10 \
+    --num-anchors 32 \
+    --num-chains 8 \
+    --langevin-burn-in 500 \
+    --langevin-samples 20 \
+    --langevin-thinning 20 \
+    --langevin-step-size 1e-4 \
+    --langevin-init forward_data \
+    --reverse-draws-per-xt 1 \
+    --sampling-chunk-size 256 \
+    --seed 120 \
+    --device cuda:0
+```
+
+Add `--train-if-missing` to train a DDPM when the checkpoint is absent, and
+`--ground-truth-adjacency path/to/adjacency.npy` (with `A[i,j] = 1` meaning
+`i -> j`) for the optional order FNR / leaf-validity evaluation.
+
+### Cost and tuning
+
+The estimator is nested:
+
+```
+(D-1) stages  x  B anchors  x  (chains x retained states)  x  reverse draws  x  t_order reverse steps
+```
+
+Network evaluations scale as roughly
+`O(D * B * C * M * L * t_order)` plus `O(D * B * C * (burn_in + M * thinning))`
+for the Langevin chains, so cost grows quickly in every direction.
+
+| Parameter | Effect |
+|---|---|
+| `--t-order` | The single timestep of the criterion. Small = closer to the `t=0` theory but noisier (`1/sigma2^2` amplification); large = smoother but more smoothing bias. |
+| `--num-anchors` | Sample size of the **variance across anchors** that *is* the criterion. Too few and the ranking is noise. Must be >= 2. |
+| `--num-chains`, `--langevin-samples` | Posterior sample count per anchor; drives the covariance accuracy. |
+| `--langevin-step-size` | ULA bias vs mixing. Too large diverges (raises `LangevinDivergenceError`). |
+| `--langevin-burn-in`, `--langevin-thinning` | Chain equilibration and decorrelation. |
+| `--sampling-chunk-size`, `--anchor-chunk-size` | Memory/throughput knobs; lower them on OOM. |
+| `--standardize` | Opt-in only. Mean/scale are stored in the checkpoint and reapplied identically at inference; the ordering coordinate space is recorded in the output. No scale-invariance of the criterion is claimed. |
+
+`--max-memory-gb` rejects settings whose reverse-diffusion batch would be
+excessive before any allocation happens. `--device` is honoured with a safe
+fallback to CPU; no GPU index is hard-coded.
+
+### Outputs
+
+```text
+results/dag_ordering/<run>/
+├── config.json                 # full resolved configuration
+├── ordering_result.json        # leaf_order, topological_order, criterion_by_stage, warnings
+├── stage_diagnostics.pt        # per-stage Hessian diagonals, criteria, Langevin diagnostics
+├── runtime.json                # timings + peak CUDA memory
+└── checkpoint_reference.json   # which model produced the ordering
+```
+
+### Tests
+
+```bash
+conda activate env_gpu
+pytest -q             # score-adapter algebra, analytic Gaussian Langevin,
+                      # analytic Tweedie Hessian, end-to-end smoke
+pytest -q -m slow     # the expensive CLI round-trip
+```
