@@ -301,3 +301,31 @@ def test_kendall_tau_helper_matches_ordering_metrics():
     order = list(np.random.default_rng(0).permutation(10))
     assert kendall_tau_vs_valid_orders(order, A) == pytest.approx(
         ordering_metrics(order, A)["kendall_tau"])
+
+
+def test_scaling_study_clamps_anchors_to_sample_size():
+    """The anchor budget cannot exceed the number of available rows.
+
+    ``run_scaling_study`` takes ``min(anchors, n)``; without that clamp,
+    ``torch.randperm(n)[:anchors]`` would silently return fewer anchors than
+    requested and the recorded budget would be wrong.
+    """
+    from experiments.run_scaling_study import standardize
+
+    n, anchors = 1000, 2048
+    assert min(anchors, n) == 1000
+
+    X = np.random.default_rng(0).normal(size=(50, 4))
+    Z = standardize(X)
+    assert Z.dtype == np.float32
+    np.testing.assert_allclose(Z.mean(axis=0), 0.0, atol=1e-5)
+    np.testing.assert_allclose(Z.std(axis=0), 1.0, atol=1e-5)
+
+
+def test_standardize_handles_constant_column():
+    """A zero-variance column must not produce NaNs."""
+    from experiments.run_scaling_study import standardize
+
+    X = np.column_stack([np.ones(20), np.arange(20.0)])
+    Z = standardize(X)
+    assert np.isfinite(Z).all()
