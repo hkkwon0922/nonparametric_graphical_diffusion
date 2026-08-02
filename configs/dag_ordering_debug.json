@@ -1,0 +1,38 @@
+{
+  "_comment": "DEBUG settings only: these run in a few minutes on CPU and exist to validate that the code path works end to end. They are NOT scientifically adequate - the Langevin chains are far too short and there are far too few anchors and posterior samples for a trustworthy covariance estimate. Use the 'real experiment' command in README.md for actual results.",
+
+  "data_path": "data/dag_ordering_debug/dag3_chain.npy",
+  "checkpoint_path": "results/dag_ordering/debug/ddpm.pt",
+  "train_if_missing": true,
+  "output_dir": "results/dag_ordering/debug",
+  "ground_truth_adjacency": "data/dag_ordering_debug/dag3_chain_adjacency.npy",
+
+  "t_order": 3,
+  "num_anchors": 4,
+  "anchor_chunk_size": 4,
+  "tie_tolerance": 1e-12,
+
+  "num_chains": 2,
+  "langevin_burn_in": 20,
+  "langevin_samples": 3,
+  "langevin_thinning": 2,
+  "langevin_step_size": 0.0001,
+  "langevin_init": "forward_data",
+
+  "reverse_draws_per_xt": 1,
+  "sampling_chunk_size": 64,
+
+  "epochs": 30,
+  "batch_size": 64,
+  "lr": 0.002,
+  "mid_features": 32,
+  "num_temporal_layers": 2,
+  "timesteps": 50,
+  "beta_schedule": "linear",
+  "beta_start": 0.001,
+  "beta_end": 0.2,
+
+  "seed": 120,
+  "device": "cpu",
+  "max_memory_gb": 4.0
+}
