@@ -45,19 +45,65 @@ def generate_chain_scm(n=2000, seed=120, noise_scale=0.5):
     return X, adjacency
 
 
+def generate_vstructure_scm(n=2000, seed=120, noise_scale=0.5):
+    """Sample ``(n, 3)`` data from the v-structure ``0 -> 2 <- 1``.
+
+    ::
+
+        x0 = e0
+        x1 = e1                       (independent of x0 marginally)
+        x2 = f(x0) + g(x1) + e2       (collider)
+
+    This is structurally harder than the chain: ``0`` and ``1`` are *marginally
+    independent* but become dependent given ``x2``. There are **two** valid
+    topological orders (``[0,1,2]`` and ``[1,0,2]``) since the two sources are
+    exchangeable, so the estimator must be scored by order-FNR / leaf validity
+    rather than against one reference permutation.
+
+    Node 2 is the unique sink and has **two** parents, ``{0, 1}`` — the
+    off-diagonal parent test should flag both.
+
+    Returns
+    -------
+    X: (n, 3) float64
+    adjacency: (3, 3) int, ``A[i, j] = 1`` meaning ``i -> j``
+    """
+    rng = np.random.default_rng(int(seed))
+    e = rng.normal(scale=noise_scale, size=(int(n), 3))
+
+    x0 = rng.normal(scale=1.0, size=int(n))
+    x1 = rng.normal(scale=1.0, size=int(n))
+    x2 = np.sin(2.0 * x0) + 0.5 * x0 + 0.8 * np.tanh(2.0 * x1) + 0.3 * x1 ** 2 + e[:, 2]
+
+    X = np.stack([x0, x1, x2], axis=1)
+    adjacency = np.zeros((3, 3), dtype=int)
+    adjacency[0, 2] = 1
+    adjacency[1, 2] = 1
+    return X, adjacency
+
+
+GENERATORS = {
+    "chain": ("dag3_chain", generate_chain_scm),
+    "vstructure": ("dag3_vstructure", generate_vstructure_scm),
+}
+
+
 def main():
     p = argparse.ArgumentParser(description="Generate the D=3 debug SCM dataset.")
     p.add_argument("--output-dir", default="data/dag_ordering_debug", type=str)
+    p.add_argument("--structure", default="chain", choices=sorted(GENERATORS),
+                   help="chain (0->1->2) or vstructure (0->2<-1)")
     p.add_argument("--n", default=2000, type=int)
     p.add_argument("--seed", default=120, type=int)
     p.add_argument("--noise-scale", default=0.5, type=float)
     args = p.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
-    X, adjacency = generate_chain_scm(args.n, args.seed, args.noise_scale)
+    stem, generator = GENERATORS[args.structure]
+    X, adjacency = generator(args.n, args.seed, args.noise_scale)
 
-    data_path = os.path.join(args.output_dir, "dag3_chain.npy")
-    adj_path = os.path.join(args.output_dir, "dag3_chain_adjacency.npy")
+    data_path = os.path.join(args.output_dir, f"{stem}.npy")
+    adj_path = os.path.join(args.output_dir, f"{stem}_adjacency.npy")
     np.save(data_path, X.astype(np.float64))
     np.save(adj_path, adjacency)
 
