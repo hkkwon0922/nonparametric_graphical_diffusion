@@ -28,3 +28,5 @@ data/dag_ordering_debug/
 *.pt
 !models/**/*.pt
 .pytest_cache/
+results/causal_benchmark/
+data/benchmark/
