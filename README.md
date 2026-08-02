@@ -394,3 +394,94 @@ pytest -q             # score-adapter algebra, analytic Gaussian Langevin,
                       # analytic Tweedie Hessian, end-to-end smoke
 pytest -q -m slow     # the expensive CLI round-trip
 ```
+
+---
+
+## 5. Causal-discovery benchmark: ordering + parent selection
+
+A single framework for running the whole pipeline — **topological ordering**
+followed by **parent (edge) selection** — on any dataset. Only the data path
+changes between datasets.
+
+```bash
+# your own data: (n, d) matrix + (d, d) adjacency with A[i,j]=1 meaning i -> j
+python experiments/run_causal_benchmark.py \
+    --data-path path/to/X.npy --adjacency-path path/to/A.npy \
+    --output-dir results/causal_benchmark/mydata --device cuda:0
+
+# or synthesise the benchmark scenario described below
+python experiments/run_causal_benchmark.py --generate \
+    --num-nodes 20 --density dense --num-samples 1000 --data-seed 0 \
+    --output-dir results/causal_benchmark/er20_seed0 --device cuda:0
+```
+
+### Data: the "vanilla" scenario of Montagna et al. (2023)
+
+[`data/benchmark_scm.py`](data/benchmark_scm.py) reproduces the correctly
+specified setting of [arXiv:2310.13387](https://arxiv.org/abs/2310.13387)
+(Section 3.1), so results are comparable with the numbers reported there:
+
+- nonlinear additive noise model `X_i = f_i(PA_i) + U_i`;
+- mechanisms `f_i` drawn from a **Gaussian process** with a unit-bandwidth RBF
+  kernel (their Appendix B.1);
+- Gaussian noise `U_i ~ N(0, sigma_i)`, `sigma_i ~ U(0.5, 1.0)`;
+- Erdos-Renyi graphs with their **Table 2** density schema (ER-20 dense uses
+  `m = 4`, i.e. ~80 edges; verified empirically at ~80).
+
+Mechanisms are rescaled to unit variance and the data are standardized by
+default. Without this, *varsortability* (Reisach et al.) is ~0.63 — marginal
+variance alone partly reveals the causal order, which the paper explicitly
+warns can game a benchmark. Standardizing brings it to ~0.48 (chance).
+
+### Parent selection: two routes
+
+Both are restricted to pairs the estimated order admits, so the output is
+acyclic by construction.
+
+| Method | Rule |
+|---|---|
+| `das` | DAS-style test of `H0: E[H_{i,j}] = 0` across anchors (a t-test per candidate pair, Benjamini-Hochberg FDR at `--alpha`), following Montagna et al. Lemma 3. |
+| `cluster` | 2-means over the per-timestep profile `(|H_{ij}(t_1)|, ..., |H_{ij}(t_T)|)`, normalised **per timestep across pairs**. |
+
+`--cluster-transform` selects the normalisation. The default is **`rank`**, not
+`zscore`: `|H_{ij}|` is heavy-tailed across pairs, so z-scored k-means splits
+off a few extreme pairs rather than finding the edge boundary (measured on
+ER-10 dense: F1 **0.30** for `zscore` vs **0.77** for `rank`, identical features
+and seeds). Ranks are invariant to any monotone per-timestep rescaling.
+
+### Metrics
+
+Following the paper's Appendix D, with reversed edges counted as false
+negatives:
+
+- **FNR-pi** — false negative rate of the fully connected DAG encoding the
+  estimated order. Scores the **ordering stage alone**; zero iff the order is
+  consistent with every true edge.
+- **F1 / FNR / FPR** — of the final edge set.
+
+Every run additionally reports `das_oracle_order` and `cluster_oracle_order`,
+which repeat parent selection on the **true** order. The gap between these and
+the ordinary results is exactly the damage done by ordering errors, so the two
+stages never get conflated.
+
+### Multi-seed sweep
+
+```bash
+python experiments/run_benchmark_sweep.py \
+    --num-nodes 20 --density dense --num-samples 1000 --seeds 0,1,2 \
+    --output-root results/causal_benchmark/er20_dense \
+    --epochs 2000 --batch-size 256 --mid-features 256 \
+    --t-order 8 --num-anchors 512 --anchor-chunk-size 64 \
+    --num-chains 64 --langevin-samples 32 --device cuda:0
+```
+
+Aggregates as median / quartiles across seeds (the paper uses 20 seeds and
+violin plots) and includes their random baseline (Appendix C.10: random order,
+each admitted edge kept with probability 0.5).
+
+**Budget matters.** On ER-10 dense, raising anchors from 128 to 512 moved
+ordering FNR-pi from 0.29 to 0.12 and DAS F1 from 0.30 to 0.55. The DAS test is
+power-limited: with 128 anchors the true-edge `|t|` statistics had median 1.73
+against a 1.96 threshold while *no* non-edge exceeded it — the separation was
+real but the sample size was too small to reject. `|t|` grows as `sqrt(anchors)`,
+so anchors are the lever.
