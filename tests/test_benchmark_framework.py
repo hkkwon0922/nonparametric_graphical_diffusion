@@ -227,3 +227,24 @@ def test_multitime_cluster_output_is_acyclic():
     profiles = {p: rng.random(4) for p in candidate_pairs_from_order(order)}
     A = multitime_cluster(profiles, order, seed=0)["adjacency"]
     assert is_acyclic(A)
+
+
+def test_random_baseline_is_not_secretly_an_oracle():
+    """The baseline must not reproduce the ground-truth permutation.
+
+    ``sample_er_dag(seed)`` draws its topological permutation from
+    ``default_rng(seed)``. If the baseline used the same seed it would recover
+    that permutation exactly and score FNR-pi = 0, silently turning the
+    "random" reference into an oracle.
+    """
+    from experiments.run_benchmark_sweep import random_baseline
+
+    fnrs = []
+    for seed in range(8):
+        A = sample_er_dag(20, "dense", seed=seed)
+        fnrs.append(random_baseline(20, A, seed=seed)["fnr_pi"])
+
+    fnrs = np.asarray(fnrs)
+    assert (fnrs > 0.0).all(), f"baseline achieved a perfect order: {fnrs}"
+    # a random order violates roughly half the edges
+    assert 0.2 < fnrs.mean() < 0.8, f"baseline FNR-pi implausible: {fnrs.mean()}"

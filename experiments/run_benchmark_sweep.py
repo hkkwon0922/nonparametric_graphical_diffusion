@@ -36,8 +36,17 @@ from models.dag_diffusion.benchmark_metrics import edge_metrics, fnr_pi
 
 
 def random_baseline(num_nodes, true_adjacency, seed=0, keep_prob=0.5):
-    """Paper's random baseline (Appendix C.10) -> metrics dict."""
-    rng = np.random.default_rng(int(seed))
+    """Paper's random baseline (Appendix C.10) -> metrics dict.
+
+    Samples a random topological order, takes the fully connected DAG it
+    admits, and keeps each edge with probability ``keep_prob``.
+
+    The generator is deliberately offset away from ``seed``: ``sample_er_dag``
+    uses ``default_rng(seed)`` and draws its own permutation first, so reusing
+    the same seed here would reproduce the ground-truth graph's permutation
+    exactly and hand the "random" baseline a perfect order (FNR-pi = 0).
+    """
+    rng = np.random.default_rng(int(seed) + 987_654_321)
     order = list(rng.permutation(num_nodes))
     adj = np.zeros((num_nodes, num_nodes), dtype=int)
     for a in range(num_nodes):
