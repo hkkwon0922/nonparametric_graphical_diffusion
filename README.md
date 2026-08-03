@@ -510,6 +510,43 @@ Regenerate with:
 python scripts/collect_ordering_performance.py
 ```
 
+**Does more sampling give *exact* recovery? No, beyond small graphs.** Both
+axes were swept — estimator budget (anchors and posterior samples, fixed `n`)
+and data size (`n` with a retrained model, fixed budget) — over D = 5, 10, 20 x
+3 seeds, 108 runs in ~7 hours. Judged strictly by `is_valid_order` (zero
+reversed edges):
+
+| Perfect recoveries | D=5 | D=10 | D=20 |
+|---|---|---|---|
+| budget axis (variance only) | 16/18 | 0/18 | **0/18** |
+| data axis (also model quality) | 18/18 | 4/18 | **0/18** |
+
+- **D=5 saturates** on both axes; the budget threshold sits between 128 and 256
+  anchors.
+- **D=10 is unlocked only by more data** (0/18 on the budget axis vs 4/18 from
+  `n >= 5000`), which says the binding constraint there is the *learned score*,
+  not estimator variance — spending more budget just estimates a flawed score
+  more precisely.
+- **D=20 never reaches it.** Edge accuracy does improve (0.647 → 0.885 on the
+  budget axis, 0.780 → 0.873 on the data axis) but reversed edges only fall
+  from ~17 to ~10 and never to zero, with clear diminishing returns: doubling
+  posterior samples from 4096 to 8192 moved accuracy 0.881 → 0.885.
+
+The residual error therefore looks like **criterion bias, not variance** — the
+same positive-diffusion-time issue behind the DAS null hypothesis not being
+strictly true. More samples estimate the bias more accurately rather than
+removing it; getting past it needs a methodological change (a `t -> 0` limit or
+an explicit bias correction), not more compute. The axes are also not fully
+independent: anchors are drawn from data rows, so `anchors <= n`.
+
+Reproduce with:
+
+```bash
+python experiments/run_scaling_study.py --mode budget --device cuda:0
+python experiments/run_scaling_study.py --mode data   --device cuda:0
+python scripts/analyze_scaling.py
+```
+
 **Budget matters.** On ER-10 dense, raising anchors from 128 to 512 moved
 ordering FNR-pi from 0.29 to 0.12 and DAS F1 from 0.30 to 0.55. The DAS test is
 power-limited: with 128 anchors the true-edge `|t|` statistics had median 1.73
