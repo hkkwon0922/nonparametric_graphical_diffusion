@@ -232,6 +232,9 @@ def build_argparser():
     p.add_argument("--sectors", default="Industrials", type=str,
                    help="comma-separated sector names to process")
     p.add_argument("--epoch", default=2000, type=int, help="checkpoint epoch to use")
+    p.add_argument("--tag", default="", type=str,
+                   help="suffix appended to the output filename, to keep raw/standardized "
+                        "runs from the same checkpoint epoch distinct")
 
     # diffusion (defaults overridden by each sector's run_config.json when present)
     p.add_argument("--timesteps", default=500, type=int)
@@ -295,12 +298,23 @@ def main():
         for key in ("beta_start", "beta_end"):
             if key in run_cfg:
                 setattr(args, key, float(run_cfg[key]))
+        standardize_companies = bool(run_cfg.get("standardize_companies", False))
 
         csv_path = os.path.join(args.sector_csv_dir, f"sector_{sector}_Rt.csv")
         if not os.path.exists(csv_path):
             raise FileNotFoundError(f"Sector CSV not found: {csv_path}")
         train_data, company_cols, date_index = load_sector_rt_matrix(csv_path, args.sector_nan_fill)
         n_samples, n_features = train_data.shape
+
+        # x0 anchors must live in the same space the model was trained on: if the
+        # checkpoint was trained on standardized returns, standardize here too, using
+        # the SAME mean/sd saved at training time (not re-estimated on this pass).
+        if standardize_companies:
+            stats_path = os.path.join(sector_ckpt_dir, "company_stats.npz")
+            z = np.load(stats_path)
+            col_mean, col_sd = z["mean"], z["sd"]
+            train_data = ((train_data - col_mean) / col_sd).astype(train_data.dtype)
+            print(f"[standardize] applying saved per-company stats from {stats_path}")
 
         print("=" * 80)
         print(f"sector={sector} | csv={csv_path} | data (Date x Company)={train_data.shape}")
@@ -321,7 +335,8 @@ def main():
         ckpt_stem = os.path.splitext(os.path.basename(ckpt_path))[0]
         out_path = os.path.join(
             args.output_dir,
-            f"hessian_network_{sector}_{ckpt_stem}_x0_{num_x0}_bx0_{args.batch_x0}"
+            f"hessian_network_{sector}_{ckpt_stem}"
+            f"{('_' + args.tag) if args.tag else ''}_x0_{num_x0}_bx0_{args.batch_x0}"
             f"_S_{args.num_samples_per_t}_t{args.t_min}-{args.t_max}.pickle",
         )
 

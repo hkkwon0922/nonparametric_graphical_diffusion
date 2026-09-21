@@ -14,10 +14,10 @@ To reproduce the numerical experiments in the main paper, readers can run the fo
 
 ```text
 ├── visualization/
-│   ├── plot_results.ipynb          # Simulation results
-│   ├── network_results.ipynb       # Network analysis
-│   ├── image_results.ipynb         # Image analysis
-│   ├── toy_example.ipynb           # Illustrative examples
+│   ├── plot_results_standardized.ipynb     # Simulation results
+│   ├── network_results_standardized.ipynb  # Network analysis
+│   ├── image_results_standardized.ipynb    # Image analysis
+│   ├── toy_example_standardized.ipynb      # Illustrative examples
 ```
 
 ## Reproducing the experiments
@@ -51,18 +51,9 @@ python generate_data.py
 ### Step 2 — Running the benchmark
 
 ```bash
-cd experiments
-
-# CPU models (require env_cpu)
-python run_benchmark.py --model glasso
-python run_benchmark.py --model npn
-python run_benchmark.py --model sing --p_order 1
-python run_benchmark.py --model sing --p_order 3
-
-# GPU models (require env_gpu)
+# Run from the repository root; shard the runs across available GPUs.
 conda activate env_gpu
-python run_benchmark.py --model lsing
-python run_benchmark.py --model ddpm
+python experiments/run_benchmark_std.py --gpu 0 --shard 0 --num_shards 4
 ```
 
 ## 3. Real data analysis

@@ -1,0 +1,149 @@
+{
+ "_comment": "Frozen node coordinates for network_results_standardized.ipynb, recovered from the previously rendered figure (its layout is not reproducible from the current code: spring_layout's rng.normal jitter and an older seeding make it unrecoverable). Coordinates were read from the node centroids of that PNG and validated by checking that all 21 estimated edges fall exactly on the drawn lines. Do not regenerate.",
+ "companies": [
+  "ADP",
+  "Boeing",
+  "Cummins",
+  "Delta Air Lines",
+  "Dover",
+  "Eaton",
+  "Equifax",
+  "FedEx",
+  "General Dynamics",
+  "Honeywell",
+  "Huntington Ingalls Industries",
+  "IDEX",
+  "Ingersoll-Rand",
+  "Johnson Controls",
+  "Lockheed Martin",
+  "Paccar",
+  "Parker Hannifin",
+  "Paychex",
+  "Quanta Services",
+  "Republic Services",
+  "Rockwell Automation",
+  "Southwest Airlines",
+  "Textron",
+  "TransDigm Group",
+  "UPS",
+  "United Rentals",
+  "Wabtec",
+  "Waste Management"
+ ],
+ "n_nodes": 28,
+ "pos": {
+  "ADP": [
+   -2.217133,
+   -0.855292
+  ],
+  "Boeing": [
+   -0.571701,
+   0.875381
+  ],
+  "Cummins": [
+   1.569986,
+   1.292871
+  ],
+  "Delta Air Lines": [
+   -0.029058,
+   1.95901
+  ],
+  "Dover": [
+   1.77592,
+   -1.364849
+  ],
+  "Eaton": [
+   1.854849,
+   -0.396207
+  ],
+  "Equifax": [
+   -2.453757,
+   0.51789
+  ],
+  "FedEx": [
+   -1.588335,
+   0.027686
+  ],
+  "General Dynamics": [
+   1.407184,
+   2.091129
+  ],
+  "Honeywell": [
+   1.696991,
+   0.148724
+  ],
+  "Huntington Ingalls Industries": [
+   0.493862,
+   2.278731
+  ],
+  "IDEX": [
+   1.007759,
+   -2.25354
+  ],
+  "Ingersoll-Rand": [
+   -1.031204,
+   -1.98742
+  ],
+  "Johnson Controls": [
+   -0.039213,
+   -1.909738
+  ],
+  "Lockheed Martin": [
+   2.054561,
+   1.056769
+  ],
+  "Paccar": [
+   1.050721,
+   1.467953
+  ],
+  "Parker Hannifin": [
+   0.475531,
+   -2.053579
+  ],
+  "Paychex": [
+   -1.848391,
+   -0.535745
+  ],
+  "Quanta Services": [
+   2.260671,
+   0.602616
+  ],
+  "Republic Services": [
+   -1.752324,
+   1.038522
+  ],
+  "Rockwell Automation": [
+   1.352457,
+   -1.618514
+  ],
+  "Southwest Airlines": [
+   -1.025079,
+   2.061208
+  ],
+  "Textron": [
+   -0.46123,
+   -2.078374
+  ],
+  "TransDigm Group": [
+   2.036751,
+   -1.01324
+  ],
+  "UPS": [
+   -0.499254,
+   2.115245
+  ],
+  "United Rentals": [
+   -1.376089,
+   -1.654741
+  ],
+  "Wabtec": [
+   -1.781996,
+   -1.406613
+  ],
+  "Waste Management": [
+   -2.362476,
+   1.594117
+  ]
+ },
+ "source": "recovered from previously rendered network graph figure (pixel centroids)"
+}

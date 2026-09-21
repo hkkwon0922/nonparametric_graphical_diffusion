@@ -195,6 +195,9 @@ def build_argparser():
     p.add_argument("--beta2", default=0.999, type=float)
     p.add_argument("--save-every", default=500, type=int, help="save checkpoint every N epochs")
     p.add_argument("--seed", default=1234, type=int)
+    p.add_argument("--standardize-companies", action="store_true",
+                   help="z-score each company's return series over the training window "
+                        "before training (per-column standardization).")
     p.add_argument("--device", default="cuda:2", type=str)
     p.add_argument("--wd-every", default=200, type=int)
     p.add_argument("--wd-num-samples", default=2000, type=int)
@@ -252,6 +255,16 @@ def main():
         print(f"sector [{idx}/{len(sector_files)}]: {sector_name}  csv={csv_path}")
         print(f"train data (Date x Company): {train_data.shape}")
 
+        col_mean = col_sd = None
+        if args.standardize_companies:
+            col_mean = train_data.mean(axis=0, keepdims=True)
+            col_sd = train_data.std(axis=0, keepdims=True)
+            col_sd = np.where(col_sd < 1e-8, 1.0, col_sd)   # guard against zero-variance columns
+            train_data = ((train_data - col_mean) / col_sd).astype(train_data.dtype)
+            print(f"[standardize] per-company z-score applied; "
+                  f"lambda_bar before={np.mean(np.var(train_data*col_sd+col_mean, axis=0)):.4f} "
+                  f"after={np.mean(np.var(train_data, axis=0)):.4f}")
+
         run_config = vars(args).copy()
         run_config.update({
             "train_mode": "sector_csv",
@@ -262,6 +275,13 @@ def main():
             "company_columns": company_cols,
             "train_data_shape": tuple(train_data.shape),
         })
+
+        if args.standardize_companies:
+            stats_path = os.path.join(args.output_dir, sanitize_name(sector_name),
+                                      "company_stats.npz")
+            os.makedirs(os.path.dirname(stats_path), exist_ok=True)
+            np.savez(stats_path, mean=col_mean, sd=col_sd, companies=np.array(company_cols))
+            print(f"[standardize] stats -> {stats_path}")
 
         train_one_sector(
             train_data=train_data,

@@ -1,0 +1,91 @@
+{
+  "model": "DDPM",
+  "dataset": "dim6_butterfly",
+  "N": 5000,
+  "seed": 123450,
+  "execution_time_sec": 588.67,
+  "metrics": {
+    "TP": 3,
+    "FP": 0,
+    "FN": 0,
+    "TN": 12,
+    "TPR": 1.0,
+    "FDR": 0.0,
+    "FPR": 0.0,
+    "F1": 1.0,
+    "Hamming": 0
+  },
+  "meta_info": {
+    "time_breakdown": {
+      "training_seconds": 510.11,
+      "inference_seconds": 78.47,
+      "total_seconds": 588.58
+    },
+    "source": "standardized",
+    "version": "ddpm_hessian_v1_std",
+    "preprocessing": "per-feature z-score (ddof=1)",
+    "lambda_bar_raw": 0.9764247025868112,
+    "lambda_bar_std": 1.0,
+    "hyperparams": {
+      "batch_size": 100,
+      "lr": 0.001,
+      "epochs": 1000,
+      "t_list": [
+        1,
+        30
+      ],
+      "num_samples_per_t": 5000,
+      "num_x0": 128
+    }
+  },
+  "omega": [
+    [
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ]
+  ]
+}

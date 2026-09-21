@@ -244,12 +244,23 @@ def build_model_and_diffusion(args, device, ckpt_path):
     return model, diffusion, ckpt_epoch
 
 
-def load_mnist_x0(data_root, n_take):
-    tfm = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Lambda(lambda x: x * 2.0 - 1.0),
-    ])
-    ds = torchvision.datasets.MNIST(root=data_root, train=True, download=True, transform=tfm)
+def load_mnist_x0(data_root, n_take, pixel_stats=None):
+    """x0 anchors in the same units the model was trained on.
+
+    ``pixel_stats`` is the path to the ``pixel_stats.npz`` written by
+    ``train_ddpm_mnist.py --standardize-pixels``; when given, the same per-pixel
+    z-score is applied here so that anchors match the model's input space.
+    """
+    steps = [transforms.ToTensor(),
+             transforms.Lambda(lambda x: x * 2.0 - 1.0)]
+    if pixel_stats:
+        z = np.load(pixel_stats)
+        mean_t = torch.from_numpy(z["mean"]).float()
+        sd_t = torch.from_numpy(z["sd"]).float()
+        steps.append(transforms.Lambda(lambda x: (x - mean_t) / sd_t))
+        print(f"[standardize] applying pixel stats from {pixel_stats}", flush=True)
+    ds = torchvision.datasets.MNIST(root=data_root, train=True, download=True,
+                                    transform=transforms.Compose(steps))
     n_take = min(n_take, len(ds))
     return torch.stack([ds[i][0] for i in range(n_take)], dim=0)  # (n_take, 1, 28, 28)
 
@@ -267,7 +278,8 @@ def _worker(worker_cfg, queue):
 
         device = torch.device(f"cuda:{gpu_id}")
         model, diffusion, _ = build_model_and_diffusion(args, device, ckpt_path)
-        x0_data = load_mnist_x0(args.data_root, end)[start:end]
+        x0_data = load_mnist_x0(args.data_root, end,
+                                getattr(args, "pixel_stats", None))[start:end]
 
         def _cb(**info):
             queue.put({"type": "progress", "gpu_id": gpu_id, **info})
@@ -322,8 +334,12 @@ def run_multi_gpu(args, ckpt_path, t_values, gpu_ids, n_take):
             total = max(1, sum(v["total_units"] for v in progress.values()))
             elapsed = max(1e-9, time.perf_counter() - wall0)
             eta = elapsed * (total - done) / max(1, done)
+            # flush: stdout is block-buffered when redirected to a file, so without
+            # this the progress line only reaches the log once a 4KB buffer fills --
+            # a multi-hour run then looks stalled for hours at a time.
             print(f"[Progress] {100.0 * done / total:5.1f}% | "
-                  f"ETA {int(eta // 3600):02d}:{int(eta % 3600 // 60):02d}:{int(eta % 60):02d}")
+                  f"ETA {int(eta // 3600):02d}:{int(eta % 3600 // 60):02d}:{int(eta % 60):02d}",
+                  flush=True)
         elif msg.get("type") == "error":
             for p in procs:
                 if p.is_alive():
@@ -355,7 +371,7 @@ def run_single_gpu(args, ckpt_path, t_values, n_take):
     device = torch.device(args.device)
     print(f"Computing MNIST Hessian on {device}")
     model, diffusion, _ = build_model_and_diffusion(args, device, ckpt_path)
-    x0_data = load_mnist_x0(args.data_root, n_take)
+    x0_data = load_mnist_x0(args.data_root, n_take, args.pixel_stats)
     sum_abs, sumsq_abs, count = compute_hessian_stats_over_x0(
         model=model, diffusion=diffusion, x0_data=x0_data, t_values=t_values,
         device=device, batch_x0=args.batch_x0, num_samples_per_t=args.num_samples_per_t,
@@ -401,6 +417,12 @@ def build_argparser():
     p.add_argument("--posterior-chunk", default=128, type=int, help="chunk size over S to cap VRAM")
     p.add_argument("--apply-clamp", dest="apply_clamping", action="store_true", default=False)
     p.add_argument("--seed", default=1234, type=int)
+    p.add_argument("--tag", default="", type=str,
+                   help="suffix appended to the output filename, to keep runs "
+                        "with identical checkpoint names distinct")
+    p.add_argument("--pixel-stats", default=None, type=str,
+                   help="path to pixel_stats.npz; apply the same per-pixel z-score "
+                        "to the x0 anchors as was used in training")
 
     # device / parallelism
     p.add_argument("--device", default="cuda:0", type=str, help="device for single-GPU mode")
@@ -436,7 +458,9 @@ def main():
     epoch_tag = f"epoch{ckpt_epoch}" if ckpt_epoch >= 0 else "epoch_unknown"
     out_path = os.path.join(
         args.output_dir,
-        f"hessian_mnist_{ckpt_stem}_{epoch_tag}_x0_{args.num_x0}_bx0_{args.batch_x0}_S_{args.num_samples_per_t}.pickle",
+        f"hessian_mnist_{ckpt_stem}_{epoch_tag}_x0_{args.num_x0}"
+        f"_bx0_{args.batch_x0}_S_{args.num_samples_per_t}"
+        f"{('_' + args.tag) if args.tag else ''}.pickle",
     )
 
     payload = {

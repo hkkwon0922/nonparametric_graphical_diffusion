@@ -1,0 +1,78 @@
+{
+  "model": "DDPM",
+  "dataset": "dim5_cop_gau",
+  "N": 500,
+  "seed": 123450,
+  "execution_time_sec": 125.83,
+  "metrics": {
+    "TP": 4,
+    "FP": 0,
+    "FN": 0,
+    "TN": 6,
+    "TPR": 1.0,
+    "FDR": 0.0,
+    "FPR": 0.0,
+    "F1": 1.0,
+    "Hamming": 0
+  },
+  "meta_info": {
+    "time_breakdown": {
+      "training_seconds": 51.21,
+      "inference_seconds": 74.54,
+      "total_seconds": 125.75
+    },
+    "source": "standardized",
+    "version": "ddpm_hessian_v1_std",
+    "preprocessing": "per-feature z-score (ddof=1)",
+    "lambda_bar_raw": 0.17282736916442554,
+    "lambda_bar_std": 1.0,
+    "hyperparams": {
+      "batch_size": 100,
+      "lr": 0.001,
+      "epochs": 1000,
+      "t_list": [
+        1,
+        30
+      ],
+      "num_samples_per_t": 5000,
+      "num_x0": 128
+    }
+  },
+  "omega": [
+    [
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      1.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ]
+  ]
+}

@@ -44,12 +44,22 @@ DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 # --------------------------------------------------------------------------
 # Data loading
 # --------------------------------------------------------------------------
-def load_hessian(data_dir=DATA_DIR):
-    """Load the MNIST Hessian payload and return ``H_dict_avg`` (t -> matrix)."""
-    candidates = sorted(glob.glob(os.path.join(data_dir, "hessian_mnist_*.pickle")))
-    if not candidates:
-        raise FileNotFoundError(f"No MNIST hessian pickle found in: {data_dir}")
-    path = max(candidates, key=os.path.getmtime)
+def load_hessian(data_dir=DATA_DIR, path=None, pattern="hessian_mnist_*_std128.pickle"):
+    """Load the MNIST Hessian payload and return ``H_dict_avg`` (t -> matrix).
+
+    ``path`` selects a specific pickle; otherwise the most recently modified file
+    matching ``pattern`` is used.  Pass ``pattern`` to pick a specific run.
+
+    This tree keeps the standardized-input results only, so the default pattern
+    matches the ``_std128`` Hessian.  The raw-input pickle it used to default to
+    is no longer shipped here; ``image_results_standardized.ipynb`` also passes
+    the pattern explicitly rather than relying on this default.
+    """
+    if path is None:
+        candidates = sorted(glob.glob(os.path.join(data_dir, pattern)))
+        if not candidates:
+            raise FileNotFoundError(f"No MNIST hessian pickle found in: {data_dir} ({pattern})")
+        path = max(candidates, key=os.path.getmtime)
     with open(path, "rb") as handle:
         obj = pickle.load(handle)
     if isinstance(obj, dict) and "H_dict_avg" in obj:

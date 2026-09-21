@@ -16,6 +16,7 @@ import math
 import os
 import sys
 
+import numpy as np
 import torch
 import torchvision
 from torch.optim import Adam
@@ -82,6 +83,12 @@ def build_argparser():
     p.add_argument("--device", default="cuda:0", type=str)
     p.add_argument("--num-workers", default=4, type=int)
     p.add_argument("--resume", action="store_true")
+    p.add_argument("--standardize-pixels", action="store_true",
+                   help="z-score each pixel over the training set (after the [-1,1] map). "
+                        "Near-constant background pixels would blow up, so the per-pixel "
+                        "sd is floored at --sd-floor.")
+    p.add_argument("--sd-floor", default=0.10, type=float,
+                   help="lower bound on the per-pixel sd used for standardization")
 
     # diffusion (defaults match the "small timesteps" MNIST setup)
     p.add_argument("--timesteps", default=500, type=int)
@@ -124,6 +131,30 @@ def main():
     train_set = torchvision.datasets.MNIST(
         root=args.data_root, train=True, download=True, transform=tfm,
     )
+
+    if args.standardize_pixels:
+        # Per-pixel mean/sd over the whole training set, in [-1,1] units.
+        raw = train_set.data.numpy().reshape(-1, 1, 28, 28).astype(np.float64) / 255.0
+        raw = raw * 2.0 - 1.0
+        px_mean = raw.mean(axis=0)
+        px_sd = np.maximum(raw.std(axis=0), args.sd_floor)
+        px_mean_t = torch.from_numpy(px_mean).float()
+        px_sd_t = torch.from_numpy(px_sd).float()
+
+        stats_path = os.path.join(args.chkpt_dir, "pixel_stats.npz")
+        os.makedirs(args.chkpt_dir, exist_ok=True)
+        np.savez(stats_path, mean=px_mean, sd=px_sd, sd_floor=args.sd_floor)
+        print(f"[standardize] per-pixel z-score, sd floored at {args.sd_floor}; "
+              f"stats -> {stats_path}", flush=True)
+
+        tfm = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Lambda(lambda x: x * 2.0 - 1.0),
+            transforms.Lambda(lambda x: (x - px_mean_t) / px_sd_t),
+        ])
+        train_set = torchvision.datasets.MNIST(
+            root=args.data_root, train=True, download=True, transform=tfm,
+        )
     train_loader = DataLoader(
         train_set, batch_size=args.batch_size, shuffle=True,
         num_workers=args.num_workers, pin_memory=True,
